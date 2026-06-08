@@ -1,0 +1,102 @@
+<div class="card">
+    <h2 style="margin-top: 0;">Manajemen Stok Bahan Ajar</h2>
+    
+    <div class="toolbar">
+        <div class="filter-group">
+            <select class="form-control" v-model="filterUpbjj">
+                <option value="">-- Semua UT-Daerah --</option>
+                <option v-for="u in upbjjList" :value="u">{{ u }}</option>
+            </select>
+            
+            <select class="form-control" v-if="filterUpbjj" v-model="filterKategori">
+                <option value="">-- Semua Kategori --</option>
+                <option v-for="k in kategoriList" :value="k">{{ k }}</option>
+            </select>
+            
+            <label class="checkbox-btn">
+                <input type="checkbox" v-model="filterReorder"> ⚠️ Re-order (Menipis/Kosong)
+            </label>
+        </div>
+        
+        <button class="btn btn-secondary" @click="resetFilter" v-if="filterUpbjj || filterKategori || filterReorder || sortBy">
+            🔄 Reset Filter
+        </button>
+    </div>
+
+    <div class="table-responsive">
+        <table>
+            <thead>
+                <tr>
+                    <th @click="sortBy = 'judul'" class="sortable">Kode & MK ↕️</th>
+                    <th>Kategori</th>
+                    <th>UT-Daerah</th>
+                    <th>Rak</th>
+                    <th @click="sortBy = 'harga'" class="sortable">Harga ↕️</th>
+                    <th @click="sortBy = 'qty'" class="sortable">Stok ↕️</th>
+                    <th>Status</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="(item, idx) in sortedFilteredData" :key="idx" class="hover-row">
+                    <!-- Mode Edit (Terupdate dengan validasi keyboard enter langsung simpan) -->
+                    <td colspan="7" v-if="editIndex === idx" class="edit-mode">
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <input class="form-control input-sm" v-model="editForm.judul" placeholder="Judul" @keyup.enter="simpanEdit(idx)">
+                            <input class="form-control input-sm" v-model="editForm.lokasiRak" placeholder="Rak" @keyup.enter="simpanEdit(idx)">
+                            <input class="form-control input-sm" type="number" v-model.number="editForm.harga" placeholder="Harga" @keyup.enter="simpanEdit(idx)">
+                            <input class="form-control input-sm" type="number" v-model.number="editForm.qty" placeholder="Stok" @keyup.enter="simpanEdit(idx)">
+                        </div>
+                        <span style="font-size: 11px; color: #64748b; margin-top: 5px; display: block;">
+                            *Tekan <b>Enter</b> pada keyboard untuk menyimpan pembaruan.
+                        </span>
+                    </td>
+                    <td v-if="editIndex === idx">
+                        <button class="btn btn-success" @click="simpanEdit(idx)">Simpan</button>
+                    </td>
+
+                    <!-- Mode Tampil Biasa -->
+                    <td v-if="editIndex !== idx"><strong>{{ item.kode }}</strong><br><small>{{ item.judul }}</small></td>
+                    <td v-if="editIndex !== idx">{{ item.kategori }}</td>
+                    <td v-if="editIndex !== idx">{{ item.upbjj }}</td>
+                    <td v-if="editIndex !== idx">{{ item.lokasiRak }}</td>
+                    <td v-if="editIndex !== idx">{{ item.harga | currencyRp }}</td>
+                    <td v-if="editIndex !== idx"><strong>{{ item.qty | formatBuah }}</strong></td>
+                    <td v-if="editIndex !== idx">
+                        <span class="tooltip-container">
+                            <status-badge :qty="item.qty" :safety="item.safety"></status-badge>
+                            <div class="tooltip-content" v-html="item.catatanHTML"></div>
+                        </span>
+                    </td>
+                    <td v-if="editIndex !== idx">
+                        <button class="btn btn-warning btn-sm" @click="mulaiEdit(idx, item)">✎</button>
+                        <button class="btn btn-danger btn-sm" @click="hapusData(idx, item)">🗑</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Form Tambah Data -->
+    <div class="form-box">
+        <h3 style="margin-top: 0;">➕ Tambah Bahan Ajar Baru</h3>
+        <p class="text-muted" style="font-size: 14px; margin-bottom: 15px;">Isi data di bawah lalu klik <b>Simpan</b> atau tekan <b>Enter</b>.</p>
+        <div class="grid-form">
+            <input class="form-control" v-model="formBaru.kode" placeholder="Kode MK" @keyup.enter="tambahData">
+            <input class="form-control" v-model="formBaru.judul" placeholder="Judul Mata Kuliah" @keyup.enter="tambahData">
+            <select class="form-control" v-model="formBaru.kategori" @keyup.enter="tambahData">
+                <option value="">-- Kategori --</option>
+                <option v-for="k in kategoriList" :value="k">{{ k }}</option>
+            </select>
+            <select class="form-control" v-model="formBaru.upbjj" @keyup.enter="tambahData">
+                <option value="">-- Daerah --</option>
+                <option v-for="u in upbjjList" :value="u">{{ u }}</option>
+            </select>
+            <input class="form-control" v-model="formBaru.lokasiRak" placeholder="Lokasi Rak" @keyup.enter="tambahData">
+            <input class="form-control" type="number" v-model.number="formBaru.harga" placeholder="Harga" @keyup.enter="tambahData">
+            <input class="form-control" type="number" v-model.number="formBaru.qty" placeholder="Jumlah Stok" @keyup.enter="tambahData">
+            
+            <button class="btn btn-primary" @click="tambahData">💾 Simpan Data</button>
+        </div>
+    </div>
+</div>

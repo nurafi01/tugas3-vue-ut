@@ -1,0 +1,14 @@
+<div class="modal-overlay" v-show="tampil">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h3>{{ judul }}</h3>
+            <span class="close-btn" @click="tutup">&times;</span>
+        </div>
+        <p class="modal-body">{{ pesan }}</p>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" v-if="!hanyaPeringatan" @click="tutup">Batal</button>
+            <button class="btn btn-danger" v-if="!hanyaPeringatan" @click="konfirmasi">Ya, Lanjutkan</button>
+            <button class="btn btn-primary" v-if="hanyaPeringatan" @click="tutup">OK, Mengerti</button>
+        </div>
+    </div>
+</div>

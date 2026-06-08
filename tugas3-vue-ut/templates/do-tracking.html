@@ -1,0 +1,60 @@
+<div class="card">
+    <h2 style="margin-top: 0;">Tracking & Pengiriman DO</h2>
+    
+    <div class="search-input-group">
+        <input class="form-control" v-model="cariQuery" placeholder="🔍 Masukkan Nomor DO atau NIM lalu tekan Enter..." @keyup.enter="jalankanCari" @keyup.esc="resetCari">
+        <button type="button" class="btn btn-primary" @click="jalankanCari">Cari</button>
+        <button type="button" class="btn btn-secondary" @click="resetCari" v-if="hasilCari">Reset (Esc)</button>
+    </div>
+           
+    <div v-if="hasilCari" class="result-box">
+        <div class="modal-header" style="margin-bottom: 10px;">
+            <h3 style="margin: 0;">Detail DO: <span class="text-primary">{{ hasilDO }}</span></h3>
+            <span class="badge bg-green" style="font-size: 14px;">{{ hasilCari.status }}</span>
+        </div>
+        <p><strong>NIM:</strong> {{ hasilCari.nim }} | <strong>Nama:</strong> {{ hasilCari.nama }} | <strong>Ekspedisi:</strong> {{ hasilCari.ekspedisi }}</p>
+        
+        <hr>
+        <h4>Riwayat Perjalanan:</h4>
+        <ul class="timeline">
+            <li v-for="p in hasilCari.perjalanan"><strong>[{{ p.waktu }}]</strong> - {{ p.keterangan }}</li>
+        </ul>
+
+        <div class="update-progress-box">
+            <input class="form-control" v-model="progressBaru" placeholder="Tambahkan keterangan status perjalanan terbaru..." @keyup.enter="tambahProgress">
+            <button type="button" class="btn btn-success" @click="tambahProgress">Update Status</button>
+        </div>
+    </div>
+
+    <hr style="margin: 30px 0;">
+    
+    <h3 style="margin-top: 0;">Buat Delivery Order (DO) Baru</h3>
+    <div class="form-box">
+        <div class="grid-form">
+            <div style="display: flex; gap: 5px;">
+                <input class="form-control readonly-cool" v-model="formDo.doNumber" readonly placeholder="Nomor DO Otomatis">
+                <button type="button" class="btn btn-secondary" @click="generateDO" title="Generate ulang nomor">🔄</button>
+            </div>
+            
+            <input class="form-control" v-model="formDo.nim" placeholder="NIM Mahasiswa" @keyup.enter="simpanDO">
+            <input class="form-control" v-model="formDo.nama" placeholder="Nama Lengkap" @keyup.enter="simpanDO">
+            
+            <select class="form-control" v-model="formDo.ekspedisi" @keyup.enter="simpanDO">
+                <option value="">-- Pilih Ekspedisi --</option>
+                <option v-for="eks in pengirimanList" :value="eks.nama">{{ eks.nama }}</option>
+            </select>
+
+            <select class="form-control" v-model="formDo.paketKode" style="grid-column: 1 / -1;" @keyup.enter="simpanDO">
+                <option value="">-- Pilih Paket Bahan Ajar --</option>
+                <option v-for="p in paketList" :value="p.kode">{{ p.kode }} - {{ p.nama }}</option>
+            </select>
+        </div>
+
+        <div v-if="infoPaket" class="info-paket-box">
+            <p style="margin-top: 0;">📦 <strong>Isi Paket:</strong> {{ infoPaket.isi.join(', ') }}</p>
+            <p style="margin-bottom: 0;">💰 <strong>Total Biaya:</strong> {{ infoPaket.harga | currencyRp }}</p>
+        </div>
+
+        <button type="button" class="btn btn-primary" style="margin-top: 20px; width: 100%; font-size: 16px;" @click="simpanDO">🚀 Buat Pesanan </button>
+    </div>
+</div>
